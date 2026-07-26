@@ -1,7 +1,7 @@
 :root {
-  --text: #6b6375;
+  --text: #694d8b;
   --text-h: #08060d;
-  --bg: #fff;
+  --bg: #faf3f3;
   --border: #e5e4e7;
   --code-bg: #f4f3ec;
   --accent: #aa3bff;
@@ -108,4 +108,33 @@ code {
   line-height: 135%;
   padding: 4px 8px;
   background: var(--code-bg);
+}
+/* Penyesuaian khusus layar HP */
+@media (max-width: 1024px) {
+  :root {
+    font-size: 17px;
+  }
+  
+  #root {
+    padding-inline: 16px;
+  }
+
+  h1 {
+    font-size: 32px !important;
+    margin: 16px 0 !important;
+  }
+
+  h2 {
+    font-size: 20px !important;
+  }
+}
+
+/* Memperbesar area sentuh tombol dan ikon agar nyaman di jari */
+button, 
+input, 
+select, 
+textarea, 
+.button-icon {
+  min-height: 44px;
+  min-width: 44px;
 }
