@@ -1,10 +1,10 @@
 :root {
-  --text: #694d8b;
+  --text: #f5f2f8;
   --text-h: #08060d;
-  --bg: #9068a8ea;
+  --bg: #2b76b9ea;
   --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
+  --code-bg: #bbac4e;
+  --accent: #5a059b;
   --accent-bg: rgba(170, 59, 255, 0.1);
   --accent-border: rgba(170, 59, 255, 0.5);
   --social-bg: rgba(244, 243, 236, 0.5);
@@ -16,7 +16,7 @@
   --mono: ui-monospace, Consolas, monospace;
 
   font: 24px/145% var(--sans);
-  letter-spacing: 020px;
+  letter-spacing: 018px;
   color-scheme: light dark;
   color: var(--text);
   background: var(--bg);
@@ -26,7 +26,7 @@
   -moz-osx-font-smoothing: grayscale;
 
   @media (max-width: 1024px) {
-    font-size: 20px;
+    font-size: 30px;
   }
 }
 
