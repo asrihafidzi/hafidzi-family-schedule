@@ -1,7 +1,7 @@
 :root {
   --text: #694d8b;
   --text-h: #08060d;
-  --bg: #faf3f3;
+  --bg: #9068a8ea;
   --border: #e5e4e7;
   --code-bg: #f4f3ec;
   --accent: #aa3bff;
@@ -15,8 +15,8 @@
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
+  font: 24px/145% var(--sans);
+  letter-spacing: 020px;
   color-scheme: light dark;
   color: var(--text);
   background: var(--bg);
@@ -26,11 +26,11 @@
   -moz-osx-font-smoothing: grayscale;
 
   @media (max-width: 1024px) {
-    font-size: 16px;
+    font-size: 20px;
   }
 }
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light) {
   :root {
     --text: #9ca3af;
     --text-h: #f3f4f6;
@@ -135,6 +135,6 @@ input,
 select, 
 textarea, 
 .button-icon {
-  min-height: 44px;
-  min-width: 44px;
+  min-height: 60px;
+  min-width: 60px;
 }
