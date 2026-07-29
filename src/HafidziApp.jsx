@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Home, BookOpen, CheckSquare, Calendar, Utensils, Moon, LogOut 
+  Home, BookOpen, CheckSquare, Calendar, Utensils, Moon, LogOut, Bell 
 } from 'lucide-react';
 import TodoManager from './TodoManager';
 import EventManager from './EventManager';
@@ -19,6 +19,8 @@ function InteractiveNewsletter() {
   const handleSave = () => {
     setNewsletterText(tempText);
     localStorage.setItem('family_newsletter', tempText);
+    // Beri sinyal ke tab/hp lain bahwa newsletter berubah
+    window.dispatchEvent(new Event('hafidzi_data_changed'));
     setIsEditing(false);
   };
 
@@ -67,19 +69,50 @@ function InteractiveNewsletter() {
 
 export default function HafidziApp() {
   const [activeTab, setActiveTab] = useState('home');
-  
-  // Ambil data user dari localStorage HP ini (jika pernah dipilih sebelumnya)
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('hafidzi_current_user');
     if (savedUser) {
-      try {
-        return JSON.parse(savedUser);
-      } catch (e) {
-        return null;
-      }
+      try { return JSON.parse(savedUser); } catch (e) { return null; }
     }
     return null;
   });
+
+  // State untuk Notifikasi Banner (Toast)
+  const [notification, setNotification] = useState(null);
+
+  // Trigger Banner Notifikasi Otomatis
+  const triggerNotification = (message) => {
+    setNotification(message);
+    setTimeout(() => {
+      setNotification(null);
+    }, 4000); // Hilang otomatis setelah 4 detik
+  };
+
+  // Mendengarkan perubahan data dari tab/perangkat lain secara Live Sync
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === 'hafidzi_messages') {
+        triggerNotification('💬 Ada pesan baru di Let\'s Talk!');
+      } else if (e.key === 'hafidzi_events') {
+        triggerNotification('📅 Ada pembaruan di Rencana Kegiatan!');
+      } else if (e.key === 'family_newsletter') {
+        triggerNotification('📢 Newsletter keluarga diperbarui!');
+      }
+    };
+
+    // Custom event untuk sinkronisasi dalam satu browser
+    const handleCustomSync = () => {
+      triggerNotification('✨ Ada pembaruan aktivitas keluarga!');
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('hafidzi_data_changed', handleCustomSync);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('hafidzi_data_changed', handleCustomSync);
+    };
+  }, []);
 
   // State untuk Jadwal Sholat Realtime
   const [nextPrayer, setNextPrayer] = useState({ name: 'Memuat...', time: '--:--' });
@@ -132,19 +165,16 @@ export default function HafidziApp() {
     { name: 'Ciya', avatar: '👧🏻' }
   ];
 
-  // Fungsi saat memilih user (langsung disimpan ke localStorage HP tersebut)
   const handleSelectUser = (profile) => {
     setUser(profile);
     localStorage.setItem('hafidzi_current_user', JSON.stringify(profile));
   };
 
-  // Fungsi untuk Keluar / Ganti Profil (menghapus memori di HP ini)
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem('hafidzi_current_user');
   };
 
-  // JIKA USER BELUM DIPILIH DI HP INI, TAMPILKAN HALAMAN PEMILIHAN NAMA
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-pink-100 to-purple-100 flex flex-col justify-center items-center p-6 max-w-md mx-auto font-sans shadow-2xl">
@@ -178,6 +208,19 @@ export default function HafidziApp() {
   return (
     <div className="min-h-screen bg-pink-50/50 flex flex-col max-w-md mx-auto relative shadow-2xl overflow-hidden font-sans">
       
+      {/* Banner Notifikasi Mengambang (Toast Notification) */}
+      {notification && (
+        <div className="absolute top-16 left-5 right-5 z-50 bg-slate-900/90 backdrop-blur-md text-white px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 border border-white/20 animate-bounce">
+          <div className="p-2 bg-pink-500 rounded-xl text-white">
+            <Bell size={18} />
+          </div>
+          <div className="flex-1">
+            <p className="text-xs font-bold text-pink-300">Pemberitahuan Keluarga</p>
+            <p className="text-xs font-medium">{notification}</p>
+          </div>
+        </div>
+      )}
+
       {/* Header Atas */}
       <header className="px-6 pt-6 pb-2 flex justify-between items-center bg-white/80 backdrop-blur-md sticky top-0 z-20 border-b border-pink-100/50">
         <div>
@@ -190,7 +233,6 @@ export default function HafidziApp() {
           </h1>
         </div>
 
-        {/* Tombol Ganti Profil / Keluar */}
         <button 
           onClick={handleLogout}
           title="Ganti Profil"
@@ -206,7 +248,6 @@ export default function HafidziApp() {
       <main className="flex-1 p-5 overflow-y-auto pb-32 space-y-6">
         {activeTab === 'home' && (
           <div className="space-y-4">
-            {/* Widget Jadwal Sholat Berikutnya */}
             <div className="bg-gradient-to-r from-pink-500 to-rose-500 p-6 rounded-[28px] shadow-sm text-white flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white shadow-inner shrink-0 border border-white/30">
@@ -223,10 +264,7 @@ export default function HafidziApp() {
               </div>
             </div>
 
-            {/* Kotak Newsletter Interaktif Keluarga */}
             <InteractiveNewsletter />
-
-            {/* Papan Pengumuman / Message Board */}
             <MessageBoard currentUser={user} />
           </div>
         )}

@@ -7,7 +7,7 @@ export default function EventManager() {
     if (saved) {
       try { return JSON.parse(saved); } catch (e) { return []; }
     }
-    return []; // Kosong tanpa data bawaan yang membandel
+    return [];
   });
   
   const [newTitle, setNewTitle] = useState('');
@@ -16,6 +16,7 @@ export default function EventManager() {
 
   useEffect(() => {
     localStorage.setItem('hafidzi_events', JSON.stringify(events));
+    window.dispatchEvent(new Event('hafidzi_data_changed'));
   }, [events]);
 
   const addEvent = (e) => {
@@ -44,7 +45,6 @@ export default function EventManager() {
       <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
         <h3 className="font-serif font-bold text-lg mb-4 text-slate-800">📅 Rencana Kegiatan & Event</h3>
         
-        {/* Form Tambah Event */}
         <form onSubmit={addEvent} className="space-y-3 mb-6">
           <input 
             type="text" 
@@ -74,7 +74,6 @@ export default function EventManager() {
           </button>
         </form>
 
-        {/* Daftar Event */}
         <div className="space-y-3">
           {events.length === 0 ? (
             <p className="text-center text-slate-400 text-sm py-4">Belum ada agenda kegiatan.</p>
