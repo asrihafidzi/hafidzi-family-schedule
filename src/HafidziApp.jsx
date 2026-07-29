@@ -67,9 +67,11 @@ function InteractiveNewsletter() {
 
 export default function HafidziApp() {
   const [activeTab, setActiveTab] = useState('home');
-  const [user, setUser] = useState({ name: 'Asri', avatar: '👩🏻' });
+  
+  // State user dimulai dari null agar wajib memilih nama dulu saat awal buka
+  const [user, setUser] = useState(null);
 
-  // Data profil anggota keluarga yang sudah diperbarui (Asri, Rezqi, Bebe, Aca, Ciya)
+  // Data profil anggota keluarga (Asri, Rezqi, Bebe, Aca, Ciya)
   const familyProfiles = [
     { name: 'Asri', avatar: '👩🏻' },
     { name: 'Rezqi', avatar: '👨🏻' },
@@ -84,6 +86,38 @@ export default function HafidziApp() {
     setUser(familyProfiles[nextIndex]);
   };
 
+  // JIKA USER BELUM DIPILIH, TAMPILKAN HALAMAN PEMILIHAN NAMA
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-pink-100 to-purple-100 flex flex-col justify-center items-center p-6 max-w-md mx-auto font-sans shadow-2xl">
+        <div className="bg-white/90 backdrop-blur-md p-8 rounded-[32px] shadow-xl w-full text-center border border-pink-200 space-y-6">
+          <div>
+            <span className="text-xs font-extrabold tracking-widest text-pink-400 uppercase">Hafidzi Hub</span>
+            <h1 className="text-2xl font-black text-slate-800 mt-1">Halo, Siapa Kamu? 👋</h1>
+            <p className="text-xs text-slate-500 mt-1">Pilih profilmu untuk mulai menggunakan aplikasi</p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3">
+            {familyProfiles.map((profile) => (
+              <button
+                key={profile.name}
+                onClick={() => setUser(profile)}
+                className="flex items-center gap-4 p-4 rounded-2xl bg-pink-50 hover:bg-pink-100 border border-pink-200 transition-all shadow-sm hover:scale-[1.02] active:scale-95 cursor-pointer text-left"
+              >
+                <span className="text-3xl bg-white p-2 rounded-xl shadow-sm">{profile.avatar}</span>
+                <div>
+                  <span className="font-bold text-slate-800 block text-base">{profile.name}</span>
+                  <span className="text-xs text-pink-600 font-medium">Masuk sebagai {profile.name}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // JIKA SUDAH MEMILIH, TAMPILKAN APLIKASI UTAMA
   return (
     <div className="min-h-screen bg-pink-50/50 flex flex-col max-w-md mx-auto relative shadow-2xl overflow-hidden font-sans">
       
@@ -99,7 +133,7 @@ export default function HafidziApp() {
           </h1>
         </div>
 
-        {/* Tombol Ganti Profil */}
+        {/* Tombol Ganti Profil / Keluar */}
         <button 
           onClick={cycleUser}
           className="flex items-center gap-2 bg-pink-100/70 hover:bg-pink-200/70 px-3 py-1.5 rounded-full transition shadow-sm border border-pink-200 cursor-pointer"
