@@ -41,7 +41,7 @@ export default function MessageBoard({ currentUser }) {
             Halo, {currentUser.name}! {currentUser.avatar}
           </h3>
           <p className="text-slate-600 text-sm mt-1">
-            Semoga harimu menyenangkan dan penuh semangat bersama keluarga tercinta.
+            
           </p>
         </div>
       </div>
@@ -51,7 +51,7 @@ export default function MessageBoard({ currentUser }) {
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-serif font-bold text-lg text-slate-800 flex items-center gap-2">
             <span className="p-2 bg-pink-50 text-pink-500 rounded-2xl"><MessageSquare size={18} /></span> 
-            Papan Pengumuman Keluarga
+           Let's Talk
           </h3>
         </div>
         
@@ -60,7 +60,7 @@ export default function MessageBoard({ currentUser }) {
           <div className="relative">
             <textarea 
               rows="2"
-              placeholder={`Tulis pesan atau info untuk keluarga...`} 
+              placeholder={`Tulis pesan atau info untuk Papa Ibu Bebe Aca Ciya...`} 
               value={newText}
               onChange={(e) => setNewText(e.target.value)}
               className="w-full px-4 py-3.5 bg-slate-50/80 border border-slate-100 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-300 focus:bg-white transition resize-none shadow-inner"

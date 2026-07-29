@@ -28,7 +28,7 @@ function InteractiveNewsletter() {
       
       <div className="flex justify-between items-start mb-2">
         <span className="bg-white/25 backdrop-blur-md text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider border border-white/30 shadow-sm">
-          📢 PENGUMUMAN KELUARGA
+          📢 HAFIDZI NEWSLETTER
         </span>
         <button 
           onClick={() => { setIsEditing(!isEditing); setTempText(newsletterText); }}
