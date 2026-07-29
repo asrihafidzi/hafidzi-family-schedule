@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Home, BookOpen, CheckSquare, Calendar, Utensils, Moon 
+  Home, BookOpen, CheckSquare, Calendar, Utensils, Moon, LogOut 
 } from 'lucide-react';
 import TodoManager from './TodoManager';
 import EventManager from './EventManager';
@@ -67,7 +67,19 @@ function InteractiveNewsletter() {
 
 export default function HafidziApp() {
   const [activeTab, setActiveTab] = useState('home');
-  const [user, setUser] = useState(null);
+  
+  // Ambil data user dari localStorage HP ini (jika pernah dipilih sebelumnya)
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('hafidzi_current_user');
+    if (savedUser) {
+      try {
+        return JSON.parse(savedUser);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  });
 
   // State untuk Jadwal Sholat Realtime
   const [nextPrayer, setNextPrayer] = useState({ name: 'Memuat...', time: '--:--' });
@@ -120,13 +132,19 @@ export default function HafidziApp() {
     { name: 'Ciya', avatar: '👧🏻' }
   ];
 
-  const cycleUser = () => {
-    const currentIndex = familyProfiles.findIndex(p => p.name === user.name);
-    const nextIndex = (currentIndex + 1) % familyProfiles.length;
-    setUser(familyProfiles[nextIndex]);
+  // Fungsi saat memilih user (langsung disimpan ke localStorage HP tersebut)
+  const handleSelectUser = (profile) => {
+    setUser(profile);
+    localStorage.setItem('hafidzi_current_user', JSON.stringify(profile));
   };
 
-  // JIKA USER BELUM DIPILIH, TAMPILKAN HALAMAN PEMILIHAN NAMA
+  // Fungsi untuk Keluar / Ganti Profil (menghapus memori di HP ini)
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('hafidzi_current_user');
+  };
+
+  // JIKA USER BELUM DIPILIH DI HP INI, TAMPILKAN HALAMAN PEMILIHAN NAMA
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-pink-100 to-purple-100 flex flex-col justify-center items-center p-6 max-w-md mx-auto font-sans shadow-2xl">
@@ -134,14 +152,14 @@ export default function HafidziApp() {
           <div>
             <span className="text-xs font-extrabold tracking-widest text-pink-400 uppercase">Hafidzi Hub</span>
             <h1 className="text-2xl font-black text-slate-800 mt-1">Halo, Siapa Kamu? 👋</h1>
-            <p className="text-xs text-slate-500 mt-1">Pilih profilmu untuk mulai menggunakan aplikasi</p>
+            <p className="text-xs text-slate-500 mt-1">Pilih profilmu. HP ini akan mengingat pilihanmu!</p>
           </div>
 
           <div className="grid grid-cols-1 gap-3">
             {familyProfiles.map((profile) => (
               <button
                 key={profile.name}
-                onClick={() => setUser(profile)}
+                onClick={() => handleSelectUser(profile)}
                 className="flex items-center gap-4 p-4 rounded-2xl bg-pink-50 hover:bg-pink-100 border border-pink-200 transition-all shadow-sm hover:scale-[1.02] active:scale-95 cursor-pointer text-left"
               >
                 <span className="text-3xl bg-white p-2 rounded-xl shadow-sm">{profile.avatar}</span>
@@ -172,14 +190,15 @@ export default function HafidziApp() {
           </h1>
         </div>
 
-        {/* Tombol Ganti Profil */}
+        {/* Tombol Ganti Profil / Keluar */}
         <button 
-          onClick={cycleUser}
-          className="flex items-center gap-2 bg-pink-100/70 hover:bg-pink-200/70 px-3 py-1.5 rounded-full transition shadow-sm border border-pink-200 cursor-pointer"
+          onClick={handleLogout}
+          title="Ganti Profil"
+          className="flex items-center gap-2 bg-pink-100/70 hover:bg-rose-100 px-3 py-1.5 rounded-full transition shadow-sm border border-pink-200 cursor-pointer text-slate-700 hover:text-rose-600"
         >
           <span className="text-base">{user.avatar}</span>
-          <span className="text-xs font-bold text-slate-700">{user.name}</span>
-          <span className="text-xs text-pink-500">🔄</span>
+          <span className="text-xs font-bold">{user.name}</span>
+          <LogOut size={14} className="text-pink-500 ml-0.5" />
         </button>
       </header>
 
@@ -187,7 +206,7 @@ export default function HafidziApp() {
       <main className="flex-1 p-5 overflow-y-auto pb-32 space-y-6">
         {activeTab === 'home' && (
           <div className="space-y-4">
-            {/* Widget Jadwal Sholat Berikutnya (Menggantikan Kotak Halo) */}
+            {/* Widget Jadwal Sholat Berikutnya */}
             <div className="bg-gradient-to-r from-pink-500 to-rose-500 p-6 rounded-[28px] shadow-sm text-white flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white shadow-inner shrink-0 border border-white/30">
@@ -222,7 +241,7 @@ export default function HafidziApp() {
       <nav className="absolute bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-pink-100 py-3 px-6 flex justify-around items-center z-30 shadow-lg">
         <button 
           onClick={() => setActiveTab('home')} 
-          className={`flex flex-col items-center transition ${activeTab === 'home' ? 'text-pink-500 scale-110' : 'text-slate-400 hover:text-slate-600'}`}
+          className={`flex flex-col items-center transition ${activeTab === 'home' ? 'text-pink-500 scale-115' : 'text-slate-400 hover:text-slate-600'}`}
         >
           <Home className="w-6 h-6" />
           <span className="text-[10px] font-bold mt-1">Beranda</span>
@@ -230,7 +249,7 @@ export default function HafidziApp() {
 
         <button 
           onClick={() => setActiveTab('todos')} 
-          className={`flex flex-col items-center transition ${activeTab === 'todos' ? 'text-pink-500 scale-110' : 'text-slate-400 hover:text-slate-600'}`}
+          className={`flex flex-col items-center transition ${activeTab === 'todos' ? 'text-pink-500 scale-115' : 'text-slate-400 hover:text-slate-600'}`}
         >
           <CheckSquare className="w-6 h-6" />
           <span className="text-[10px] font-bold mt-1">Tugas</span>
@@ -238,7 +257,7 @@ export default function HafidziApp() {
 
         <button 
           onClick={() => setActiveTab('menu')} 
-          className={`flex flex-col items-center transition ${activeTab === 'menu' ? 'text-pink-500 scale-110' : 'text-slate-400 hover:text-slate-600'}`}
+          className={`flex flex-col items-center transition ${activeTab === 'menu' ? 'text-pink-500 scale-115' : 'text-slate-400 hover:text-slate-600'}`}
         >
           <Utensils className="w-6 h-6" />
           <span className="text-[10px] font-bold mt-1">Menu</span>
@@ -246,7 +265,7 @@ export default function HafidziApp() {
 
         <button 
           onClick={() => setActiveTab('schedule')} 
-          className={`flex flex-col items-center transition ${activeTab === 'schedule' ? 'text-pink-500 scale-110' : 'text-slate-400 hover:text-slate-600'}`}
+          className={`flex flex-col items-center transition ${activeTab === 'schedule' ? 'text-pink-500 scale-115' : 'text-slate-400 hover:text-slate-600'}`}
         >
           <BookOpen className="w-6 h-6" />
           <span className="text-[10px] font-bold mt-1">Catatan</span>
@@ -254,7 +273,7 @@ export default function HafidziApp() {
 
         <button 
           onClick={() => setActiveTab('events')} 
-          className={`flex flex-col items-center transition ${activeTab === 'events' ? 'text-pink-500 scale-110' : 'text-slate-400 hover:text-slate-600'}`}
+          className={`flex flex-col items-center transition ${activeTab === 'events' ? 'text-pink-500 scale-115' : 'text-slate-400 hover:text-slate-600'}`}
         >
           <Calendar className="w-6 h-6" />
           <span className="text-[10px] font-bold mt-1">Kalender</span>
