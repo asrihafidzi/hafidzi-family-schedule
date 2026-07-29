@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Home, BookOpen, CheckSquare, Calendar, Utensils, Moon, LogOut, Bell 
+  Home, BookOpen, CheckSquare, Calendar, Utensils, Moon, LogOut 
 } from 'lucide-react';
 import TodoManager from './TodoManager';
 import EventManager from './EventManager';
@@ -19,8 +19,6 @@ function InteractiveNewsletter() {
   const handleSave = () => {
     setNewsletterText(tempText);
     localStorage.setItem('family_newsletter', tempText);
-    // Beri sinyal ke tab/hp lain bahwa newsletter berubah
-    window.dispatchEvent(new Event('hafidzi_data_changed'));
     setIsEditing(false);
   };
 
@@ -76,43 +74,6 @@ export default function HafidziApp() {
     }
     return null;
   });
-
-  // State untuk Notifikasi Banner (Toast)
-  const [notification, setNotification] = useState(null);
-
-  // Trigger Banner Notifikasi Otomatis
-  const triggerNotification = (message) => {
-    setNotification(message);
-    setTimeout(() => {
-      setNotification(null);
-    }, 4000); // Hilang otomatis setelah 4 detik
-  };
-
-  // Mendengarkan perubahan data dari tab/perangkat lain secara Live Sync
-  useEffect(() => {
-    const handleStorageChange = (e) => {
-      if (e.key === 'hafidzi_messages') {
-        triggerNotification('💬 Ada pesan baru di Let\'s Talk!');
-      } else if (e.key === 'hafidzi_events') {
-        triggerNotification('📅 Ada pembaruan di Rencana Kegiatan!');
-      } else if (e.key === 'family_newsletter') {
-        triggerNotification('📢 Newsletter keluarga diperbarui!');
-      }
-    };
-
-    // Custom event untuk sinkronisasi dalam satu browser
-    const handleCustomSync = () => {
-      triggerNotification('✨ Ada pembaruan aktivitas keluarga!');
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('hafidzi_data_changed', handleCustomSync);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('hafidzi_data_changed', handleCustomSync);
-    };
-  }, []);
 
   // State untuk Jadwal Sholat Realtime
   const [nextPrayer, setNextPrayer] = useState({ name: 'Memuat...', time: '--:--' });
@@ -208,19 +169,6 @@ export default function HafidziApp() {
   return (
     <div className="min-h-screen bg-pink-50/50 flex flex-col max-w-md mx-auto relative shadow-2xl overflow-hidden font-sans">
       
-      {/* Banner Notifikasi Mengambang (Toast Notification) */}
-      {notification && (
-        <div className="absolute top-16 left-5 right-5 z-50 bg-slate-900/90 backdrop-blur-md text-white px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 border border-white/20 animate-bounce">
-          <div className="p-2 bg-pink-500 rounded-xl text-white">
-            <Bell size={18} />
-          </div>
-          <div className="flex-1">
-            <p className="text-xs font-bold text-pink-300">Pemberitahuan Keluarga</p>
-            <p className="text-xs font-medium">{notification}</p>
-          </div>
-        </div>
-      )}
-
       {/* Header Atas */}
       <header className="px-6 pt-6 pb-2 flex justify-between items-center bg-white/80 backdrop-blur-md sticky top-0 z-20 border-b border-pink-100/50">
         <div>
