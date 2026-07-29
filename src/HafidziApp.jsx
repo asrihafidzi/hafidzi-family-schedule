@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  Home, BookOpen, CheckSquare, Calendar, Utensils, Sparkles, Heart 
+  Home, BookOpen, CheckSquare, Calendar, Utensils, Moon 
 } from 'lucide-react';
 import TodoManager from './TodoManager';
 import EventManager from './EventManager';
@@ -67,11 +67,51 @@ function InteractiveNewsletter() {
 
 export default function HafidziApp() {
   const [activeTab, setActiveTab] = useState('home');
-  
-  // State user dimulai dari null agar wajib memilih nama dulu saat awal buka
   const [user, setUser] = useState(null);
 
-  // Data profil anggota keluarga (Asri, Rezqi, Bebe, Aca, Ciya)
+  // State untuk Jadwal Sholat Realtime
+  const [nextPrayer, setNextPrayer] = useState({ name: 'Memuat...', time: '--:--' });
+  const cityName = 'Bandung';
+
+  useEffect(() => {
+    const fetchPrayerTimes = async () => {
+      try {
+        const today = new Date();
+        const dateStr = `${String(today.getDate()).padStart(2, '0')}-${String(today.getMonth() + 1).padStart(2, '0')}-${today.getFullYear()}`;
+        
+        const response = await fetch(`https://api.aladhan.com/v1/timingsByCity/${dateStr}?city=Bandung&country=Indonesia&method=2`);
+        const data = await response.json();
+        
+        if (data && data.data) {
+          const timings = data.data.timings;
+          const prayers = [
+            { key: 'Fajr', label: 'SUBUH', time: timings.Fajr },
+            { key: 'Dhuhr', label: 'DZUHUR', time: timings.Dhuhr },
+            { key: 'Asr', label: 'ASHAR', time: timings.Asr },
+            { key: 'Maghrib', label: 'MAGHRIB', time: timings.Maghrib },
+            { key: 'Isha', label: 'ISYA', time: timings.Isha }
+          ];
+
+          const now = new Date();
+          const currentTimeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+          let upcoming = prayers.find(p => p.time > currentTimeStr);
+          if (!upcoming) {
+            upcoming = prayers[0]; 
+            upcoming.label = 'SUBUH (Besok)';
+          }
+
+          setNextPrayer({ name: upcoming.label, time: upcoming.time });
+        }
+      } catch (error) {
+        setNextPrayer({ name: 'SUBUH', time: '04:40' });
+      }
+    };
+
+    fetchPrayerTimes();
+  }, []);
+
+  // Data profil anggota keluarga
   const familyProfiles = [
     { name: 'Asri', avatar: '👩🏻' },
     { name: 'Rezqi', avatar: '👨🏻' },
@@ -117,7 +157,6 @@ export default function HafidziApp() {
     );
   }
 
-  // JIKA SUDAH MEMILIH, TAMPILKAN APLIKASI UTAMA
   return (
     <div className="min-h-screen bg-pink-50/50 flex flex-col max-w-md mx-auto relative shadow-2xl overflow-hidden font-sans">
       
@@ -133,7 +172,7 @@ export default function HafidziApp() {
           </h1>
         </div>
 
-        {/* Tombol Ganti Profil / Keluar */}
+        {/* Tombol Ganti Profil */}
         <button 
           onClick={cycleUser}
           className="flex items-center gap-2 bg-pink-100/70 hover:bg-pink-200/70 px-3 py-1.5 rounded-full transition shadow-sm border border-pink-200 cursor-pointer"
@@ -148,13 +187,20 @@ export default function HafidziApp() {
       <main className="flex-1 p-5 overflow-y-auto pb-32 space-y-6">
         {activeTab === 'home' && (
           <div className="space-y-4">
-            {/* Kartu Sambutan Ceria Sederhana */}
-            <div className="bg-gradient-to-r from-pink-400 to-rose-400 p-6 rounded-[28px] shadow-sm text-white flex items-center gap-4">
-              <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-2xl shadow-inner shrink-0 border border-white/30">
-                {user.avatar}
-              </div>
-              <div>
-                <h2 className="text-lg font-black tracking-tight">Halo, {user.name}! ✨</h2>
+            {/* Widget Jadwal Sholat Berikutnya (Menggantikan Kotak Halo) */}
+            <div className="bg-gradient-to-r from-pink-500 to-rose-500 p-6 rounded-[28px] shadow-sm text-white flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white shadow-inner shrink-0 border border-white/30">
+                  <Moon size={28} />
+                </div>
+                <div>
+                  <span className="text-[10px] font-extrabold tracking-wider uppercase text-pink-100 block">
+                    Jadwal Sholat • {cityName}
+                  </span>
+                  <h2 className="text-xl font-black tracking-tight mt-0.5">
+                    {nextPrayer.name} <span className="font-light opacity-90">{nextPrayer.time}</span>
+                  </h2>
+                </div>
               </div>
             </div>
 
