@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Home, BookOpen, CheckSquare, Calendar, Utensils, Moon, LogOut 
+  Home, BookOpen, CheckSquare, Calendar, Utensils, Moon, LogOut, Lock, X 
 } from 'lucide-react';
 import TodoManager from './TodoManager';
 import EventManager from './EventManager';
@@ -75,6 +75,15 @@ export default function HafidziApp() {
     return null;
   });
 
+  // State untuk Modal PIN Orang Tua
+  const [showPinModal, setShowPinModal] = useState(false);
+  const [targetParent, setTargetParent] = useState(null);
+  const [pinInput, setPinInput] = useState('');
+  const [pinError, setPinError] = useState(false);
+
+  // PIN Rahasia Orang Tua (Bisa diubah sesuka hati di sini, misal: '1234')
+  const PARENT_PIN = '1234';
+
   // State untuk Jadwal Sholat Realtime
   const [nextPrayer, setNextPrayer] = useState({ name: 'Memuat...', time: '--:--' });
   const cityName = 'Bandung';
@@ -119,16 +128,38 @@ export default function HafidziApp() {
 
   // Data profil anggota keluarga
   const familyProfiles = [
-    { name: 'Asri', avatar: '👩🏻' },
-    { name: 'Rezqi', avatar: '👨🏻' },
-    { name: 'Bebe', avatar: '👧🏻' },
-    { name: 'Aca', avatar: '👧🏻' },
-    { name: 'Ciya', avatar: '👧🏻' }
+    { name: 'Asri', avatar: '👩🏻', isParent: true },
+    { name: 'Rezqi', avatar: '👨🏻', isParent: true },
+    { name: 'Bebe', avatar: '👧🏻', isParent: false },
+    { name: 'Aca', avatar: '👧🏻', isParent: false },
+    { name: 'Ciya', avatar: '👧🏻', isParent: false }
   ];
 
   const handleSelectUser = (profile) => {
-    setUser(profile);
-    localStorage.setItem('hafidzi_current_user', JSON.stringify(profile));
+    if (profile.isParent) {
+      // Jika yang dipilih profil orang tua, munculkan modal PIN
+      setTargetParent(profile);
+      setPinInput('');
+      setPinError(false);
+      setShowPinModal(true);
+    } else {
+      // Jika anak-anak, langsung masuk tanpa PIN
+      setUser(profile);
+      localStorage.setItem('hafidzi_current_user', JSON.stringify(profile));
+    }
+  };
+
+  const verifyPin = (e) => {
+    e.preventDefault();
+    if (pinInput === PARENT_PIN) {
+      setUser(targetParent);
+      localStorage.setItem('hafidzi_current_user', JSON.stringify(targetParent));
+      setShowPinModal(false);
+      setTargetParent(null);
+    } else {
+      setPinError(true);
+      setPinInput('');
+    }
   };
 
   const handleLogout = () => {
@@ -138,12 +169,12 @@ export default function HafidziApp() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-pink-100 to-purple-100 flex flex-col justify-center items-center p-6 max-w-md mx-auto font-sans shadow-2xl">
+      <div className="min-h-screen bg-gradient-to-b from-pink-100 to-purple-100 flex flex-col justify-center items-center p-6 max-w-md mx-auto font-sans shadow-2xl relative">
         <div className="bg-white/90 backdrop-blur-md p-8 rounded-[32px] shadow-xl w-full text-center border border-pink-200 space-y-6">
           <div>
             <span className="text-xs font-extrabold tracking-widest text-pink-400 uppercase">Hafidzi Hub</span>
             <h1 className="text-2xl font-black text-slate-800 mt-1">Halo, Siapa Kamu? 👋</h1>
-            <p className="text-xs text-slate-500 mt-1">Pilih profilmu. HP ini akan mengingat pilihanmu!</p>
+            <p className="text-xs text-slate-500 mt-1">Pilih profilmu untuk masuk ke aplikasi!</p>
           </div>
 
           <div className="grid grid-cols-1 gap-3">
@@ -151,17 +182,70 @@ export default function HafidziApp() {
               <button
                 key={profile.name}
                 onClick={() => handleSelectUser(profile)}
-                className="flex items-center gap-4 p-4 rounded-2xl bg-pink-50 hover:bg-pink-100 border border-pink-200 transition-all shadow-sm hover:scale-[1.02] active:scale-95 cursor-pointer text-left"
+                className="flex items-center justify-between p-4 rounded-2xl bg-pink-50 hover:bg-pink-100 border border-pink-200 transition-all shadow-sm hover:scale-[1.02] active:scale-95 cursor-pointer text-left"
               >
-                <span className="text-3xl bg-white p-2 rounded-xl shadow-sm">{profile.avatar}</span>
-                <div>
-                  <span className="font-bold text-slate-800 block text-base">{profile.name}</span>
-                  <span className="text-xs text-pink-600 font-medium">Masuk sebagai {profile.name}</span>
+                <div className="flex items-center gap-4">
+                  <span className="text-3xl bg-white p-2 rounded-xl shadow-sm">{profile.avatar}</span>
+                  <div>
+                    <span className="font-bold text-slate-800 block text-base">{profile.name}</span>
+                    <span className="text-xs text-pink-600 font-medium">
+                      {profile.isParent ? '🔒 Akses Orang Tua' : 'Masuk sebagai ' + profile.name}
+                    </span>
+                  </div>
                 </div>
+                {profile.isParent && <Lock size={16} className="text-pink-400" />}
               </button>
             ))}
           </div>
         </div>
+
+        {/* Modal Masukkan PIN Orang Tua */}
+        {showPinModal && (
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+            <div className="bg-white rounded-[32px] p-6 w-full max-w-xs shadow-2xl space-y-4 border border-pink-100 animate-in fade-in zoom-in duration-200">
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-bold text-pink-500 uppercase tracking-wider">Verifikasi PIN</span>
+                <button 
+                  onClick={() => setShowPinModal(false)}
+                  className="text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-100 transition cursor-pointer"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="text-center space-y-1">
+                <div className="w-12 h-12 bg-pink-50 text-pink-500 rounded-2xl mx-auto flex items-center justify-center shadow-inner">
+                  <Lock size={22} />
+                </div>
+                <h3 className="font-bold text-slate-800 text-lg">Masuk as {targetParent?.name}</h3>
+                <p className="text-xs text-slate-400">Masukkan 4 digit PIN rahasia orang tua.</p>
+              </div>
+
+              <form onSubmit={verifyPin} className="space-y-3">
+                <input 
+                  type="password"
+                  maxLength="4"
+                  placeholder="• • • •"
+                  value={pinInput}
+                  onChange={(e) => setPinInput(e.target.value)}
+                  autoFocus
+                  className="w-full text-center tracking-[1em] text-lg py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-pink-400 font-bold"
+                />
+
+                {pinError && (
+                  <p className="text-center text-xs text-red-500 font-medium">PIN salah! Coba lagi ya.</p>
+                )}
+
+                <button 
+                  type="submit"
+                  className="w-full py-3 bg-gradient-to-r from-pink-400 to-rose-400 text-white font-bold rounded-2xl shadow-md hover:from-pink-500 hover:to-rose-500 transition cursor-pointer text-sm"
+                >
+                  Buka Kunci 🔓
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
