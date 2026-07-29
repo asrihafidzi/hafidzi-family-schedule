@@ -71,10 +71,10 @@ export default function TodoManager({ currentUser }) {
         </div>
         <div className="relative z-10">
           <span className="px-3 py-1 bg-white/20 backdrop-blur-md text-[10px] font-bold rounded-full uppercase tracking-wider">
-            🔒 Rahasia Orang Tua
+            🔒 IBU & PAPA ONLY
           </span>
-          <h3 className="font-serif text-xl font-bold mt-2">Daftar Tugas & Catatan Papa-Ibu</h3>
-          <p className="text-xs text-purple-100 mt-1">Data tersimpan otomatis dan aman dari intipan anak-anak.</p>
+          <h3 className="font-serif text-xl font-bold mt-2">To do list Papa & Ibu</h3>
+          <p className="text-xs text-purple-100 mt-1">secret file - parents only.</p>
         </div>
       </div>
 
@@ -82,7 +82,7 @@ export default function TodoManager({ currentUser }) {
       <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100">
         <h3 className="font-serif font-bold text-lg mb-4 text-slate-800 flex items-center gap-2">
           <span className="p-2 bg-pink-50 text-pink-500 rounded-2xl"><CheckSquare size={18} /></span>
-          Kelola Tugas
+          TO DO LIST
         </h3>
         
         {/* Form Tambah */}
