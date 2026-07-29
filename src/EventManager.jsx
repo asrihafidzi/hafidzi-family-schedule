@@ -1,15 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar, Plus, MapPin, Clock, Trash2 } from 'lucide-react';
 
 export default function EventManager() {
-  const [events, setEvents] = useState([
-    { id: 1, title: 'Papa dinas ke Jakarta', time: 'Besok, 08:00', location: 'Jakarta', category: 'Penting' },
-    { id: '2', title: 'Jalan-jalan ke mall', time: 'Minggu, 15:00', location: 'Mall', category: 'Keluarga' }
-  ]);
+  const [events, setEvents] = useState(() => {
+    const saved = localStorage.getItem('hafidzi_events');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { return []; }
+    }
+    return []; // Kosong tanpa data bawaan yang membandel
+  });
   
   const [newTitle, setNewTitle] = useState('');
   const [newTime, setNewTime] = useState('');
   const [newLocation, setNewLocation] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('hafidzi_events', JSON.stringify(events));
+  }, [events]);
 
   const addEvent = (e) => {
     e.preventDefault();
@@ -62,7 +69,7 @@ export default function EventManager() {
               className="px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-300"
             />
           </div>
-          <button type="submit" className="w-full py-3 bg-pink-400 text-white font-bold rounded-2xl shadow-sm hover:bg-pink-500 transition flex items-center justify-center gap-2">
+          <button type="submit" className="w-full py-3 bg-pink-400 text-white font-bold rounded-2xl shadow-sm hover:bg-pink-500 transition flex items-center justify-center gap-2 cursor-pointer">
             <Plus size={18} /> Tambah Kegiatan
           </button>
         </form>
@@ -81,7 +88,7 @@ export default function EventManager() {
                     <span className="flex items-center gap-1"><MapPin size={14} /> {ev.location}</span>
                   </div>
                 </div>
-                <button onClick={() => deleteEvent(ev.id)} className="text-slate-300 hover:text-red-400 transition p-1">
+                <button onClick={() => deleteEvent(ev.id)} className="text-slate-300 hover:text-red-400 transition p-1 cursor-pointer">
                   <Trash2 size={16} />
                 </button>
               </div>

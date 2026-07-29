@@ -1,11 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MessageSquare, Send, Trash2, Sparkles } from 'lucide-react';
 
 export default function MessageBoard({ currentUser }) {
-  const [messages, setMessages] = useState([
-    { id: 1, author: 'Papa', text: 'Akhir pekan ini kita akan piknik ke taman ya!', time: 'Hari ini, 10:00' }
-  ]);
+  const [messages, setMessages] = useState(() => {
+    const saved = localStorage.getItem('hafidzi_messages');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { return []; }
+    }
+    return [
+      { id: 1, author: 'Papa', text: 'Akhir pekan ini kita akan piknik ke taman ya!', time: 'Hari ini, 10:00' }
+    ];
+  });
   const [newText, setNewText] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('hafidzi_messages', JSON.stringify(messages));
+  }, [messages]);
 
   const addMessage = (e) => {
     e.preventDefault();
@@ -40,9 +50,6 @@ export default function MessageBoard({ currentUser }) {
           <h3 className="font-serif text-2xl font-bold text-slate-800 mt-2">
             Halo, {currentUser.name}! {currentUser.avatar}
           </h3>
-          <p className="text-slate-600 text-sm mt-1">
-            
-          </p>
         </div>
       </div>
 
@@ -66,7 +73,7 @@ export default function MessageBoard({ currentUser }) {
               className="w-full px-4 py-3.5 bg-slate-50/80 border border-slate-100 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-300 focus:bg-white transition resize-none shadow-inner"
             />
           </div>
-          <button type="submit" className="w-full py-3.5 bg-gradient-to-r from-pink-400 to-rose-400 text-white font-bold rounded-2xl shadow-md shadow-pink-200 hover:from-pink-500 hover:to-rose-500 transition flex items-center justify-center gap-2 text-sm">
+          <button type="submit" className="w-full py-3.5 bg-gradient-to-r from-pink-400 to-rose-400 text-white font-bold rounded-2xl shadow-md shadow-pink-200 hover:from-pink-500 hover:to-rose-500 transition flex items-center justify-center gap-2 text-sm cursor-pointer">
             <Send size={16} /> Bagikan Pesan
           </button>
         </form>
@@ -84,7 +91,7 @@ export default function MessageBoard({ currentUser }) {
                   <span className="text-xs text-slate-400">{m.time}</span>
                 </div>
               </div>
-              <button onClick={() => deleteMessage(m.id)} className="text-slate-300 hover:text-red-400 transition p-1.5 rounded-xl hover:bg-red-50">
+              <button onClick={() => deleteMessage(m.id)} className="text-slate-300 hover:text-red-400 transition p-1.5 rounded-xl hover:bg-red-50 cursor-pointer">
                 <Trash2 size={15} />
               </button>
             </div>
