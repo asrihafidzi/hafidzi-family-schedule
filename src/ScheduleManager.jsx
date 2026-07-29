@@ -4,6 +4,7 @@ import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { Calendar, Shield, User, Shirt, BookOpen, FileText, Plus, Trash2, Sparkles, Star, Award, LogOut } from 'lucide-react';
 
 export default function ScheduleManager() {
+  // Selalu mulai dari kosong agar selalu muncul halaman "Halo, Siapa Kamu?" saat link dibuka
   const [currentUserName, setCurrentUserName] = useState('');
   const [inputName, setInputName] = useState('');
   const [nameError, setNameError] = useState('');
