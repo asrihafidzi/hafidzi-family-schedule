@@ -8,147 +8,178 @@ import MessageBoard from './MessageBoard';
 import MenuManager from './MenuManager';
 import ScheduleManager from './ScheduleManager';
 
-const FAMILY_MEMBERS = [
-  { id: 'ibu', name: 'Ibu', avatar: '👩🏻' },
-  { id: 'papa', name: 'Papa', avatar: '👨🏻' },
-  { id: 'bella', name: 'Bella', avatar: '👧🏻' },
-  { id: 'aca', name: 'Aca', avatar: '👧🏻' },
-  { id: 'ciya', name: 'Ciya', avatar: '👶🏻' },
-];
+// Komponen Newsletter / Pengumuman Keluarga yang Bisa Diedit Interaktif
+function InteractiveNewsletter() {
+  const [newsletterText, setNewsletterText] = useState(() => {
+    return localStorage.getItem('family_newsletter') || "✨ Pengumuman penting: Jangan lupa cek jadwal kegiatan keluarga minggu ini ya!";
+  });
+  const [isEditing, setIsEditing] = useState(false);
+  const [tempText, setTempText] = useState(newsletterText);
+
+  const handleSave = () => {
+    setNewsletterText(tempText);
+    localStorage.setItem('family_newsletter', tempText);
+    setIsEditing(false);
+  };
+
+  return (
+    <div className="relative bg-gradient-to-br from-rose-500 via-pink-500 to-purple-500 p-6 rounded-[28px] shadow-lg text-white overflow-hidden">
+      <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+      
+      <div className="flex justify-between items-start mb-2">
+        <span className="bg-white/25 backdrop-blur-md text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider border border-white/30 shadow-sm">
+          📢 PENGUMUMAN KELUARGA
+        </span>
+        <button 
+          onClick={() => { setIsEditing(!isEditing); setTempText(newsletterText); }}
+          className="text-xs bg-white/20 hover:bg-white/30 backdrop-blur-md px-3 py-1 rounded-xl transition border border-white/20 font-medium cursor-pointer"
+        >
+          {isEditing ? 'Batal' : '✏️ Ubah Info'}
+        </button>
+      </div>
+
+      {isEditing ? (
+        <div className="mt-3 space-y-3">
+          <textarea
+            value={tempText}
+            onChange={(e) => setTempText(e.target.value)}
+            className="w-full p-3 bg-black/20 backdrop-blur-md rounded-2xl text-sm text-white placeholder-pink-200 border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/50 resize-none"
+            rows="3"
+            placeholder="Tulis info atau pengumuman baru..."
+          />
+          <button 
+            onClick={handleSave}
+            className="w-full py-2 bg-white text-rose-600 font-bold rounded-xl text-sm shadow-md hover:bg-pink-50 transition cursor-pointer"
+          >
+            Simpan Pengumuman ✨
+          </button>
+        </div>
+      ) : (
+        <div className="mt-2">
+          <p className="text-white text-sm font-medium leading-relaxed drop-shadow-sm">
+            "{newsletterText}"
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function HafidziApp() {
-  const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('hafidzi_profile');
-    return saved ? JSON.parse(saved) : null;
-  });
   const [activeTab, setActiveTab] = useState('home');
+  const [user, setUser] = useState({ name: 'Ibu', avatar: '👩🏻' });
 
-  const handleSelectUser = (member) => {
-    setUser(member);
-    localStorage.setItem('hafidzi_profile', JSON.stringify(member));
+  // Data profil anggota keluarga untuk tombol ganti profil di pojok kanan atas
+  const familyProfiles = [
+    { name: 'Ibu', avatar: '👩🏻' },
+    { name: 'Papa', avatar: '👨🏻' },
+    { name: 'Kakak', avatar: '👧🏻' },
+    { name: 'Adik', avatar: '👦🏻' }
+  ];
+
+  const cycleUser = () => {
+    const currentIndex = familyProfiles.findIndex(p => p.name === user.name);
+    const nextIndex = (currentIndex + 1) % familyProfiles.length;
+    setUser(familyProfiles[nextIndex]);
   };
 
-  const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem('hafidzi_profile');
-  };
-
-  // 1. HALAMAN PEMILIHAN PROFIL (Tema Glad2Glow: Pink Soft & Putih Bersih)
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-[#fff5f7] flex items-center justify-center p-6 font-sans">
-        <div className="bg-white p-8 rounded-[36px] shadow-xl w-full max-w-sm border border-pink-100 text-center space-y-6">
-          <div className="w-16 h-16 bg-pink-100 text-pink-500 rounded-2xl mx-auto flex items-center justify-center text-3xl shadow-inner">
-            🌸
-          </div>
-          <div>
-            <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">Hafidzi Family Hub</h1>
-            <p className="text-slate-400 text-xs mt-1">Pilih profil kamu untuk mulai masuk</p>
-          </div>
-          
-          {/* Tombol Profil Ditata Rapi ke Bawah dengan Jarak Longgar */}
-          <div className="space-y-3.5">
-            {FAMILY_MEMBERS.map(m => (
-              <button 
-                key={m.id} 
-                onClick={() => handleSelectUser(m)} 
-                className="w-full p-4 bg-pink-50/70 hover:bg-pink-100 rounded-2xl border border-pink-100 flex items-center justify-between transition-all active:scale-95 shadow-sm group text-left"
-              >
-                <div className="flex items-center gap-3.5">
-                  <span className="text-2xl">{m.avatar}</span>
-                  <span className="font-bold text-slate-700 text-sm">{m.name}</span>
-                </div>
-                <span className="text-xs text-pink-500 font-semibold group-hover:translate-x-1 transition-transform">
-                  Masuk ➔
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // 2. TAMPILAN UTAMA APLIKASI
   return (
-    <div className="min-h-screen bg-[#fff5f7] w-full max-w-md mx-auto flex flex-col shadow-2xl border-x border-pink-100 relative font-sans">
+    <div className="min-h-screen bg-pink-50/50 flex flex-col max-w-md mx-auto relative shadow-2xl overflow-hidden font-sans">
       
-      {/* Header Aplikasi */}
-      <header className="px-6 py-4 bg-white/90 backdrop-blur-md sticky top-0 z-20 flex justify-between items-center border-b border-pink-100 shadow-sm">
+      {/* Header Atas */}
+      <header className="px-6 pt-6 pb-2 flex justify-between items-center bg-white/80 backdrop-blur-md sticky top-0 z-20 border-b border-pink-100/50">
         <div>
-          <span className="text-[10px] text-pink-400 font-bold uppercase tracking-wider">Hafidzi Hub</span>
-          <h2 className="text-lg font-extrabold text-slate-800 capitalize">{activeTab === 'home' ? 'Beranda' : activeTab}</h2>
+          <span className="text-[10px] font-extrabold tracking-widest text-pink-400 uppercase">Hafidzi Hub</span>
+          <h1 className="text-xl font-black text-slate-800 capitalize">
+            {activeTab === 'home' ? 'Beranda' : 
+             activeTab === 'todos' ? 'Tugas' : 
+             activeTab === 'events' ? 'Kalender' : 
+             activeTab === 'menu' ? 'Menu Masakan' : 'Catatan'}
+          </h1>
         </div>
+
+        {/* Tombol Ganti Profil */}
         <button 
-          onClick={handleLogout} 
-          className="flex items-center gap-2 bg-pink-50 hover:bg-pink-100 px-3.5 py-1.5 rounded-full border border-pink-200 transition-all shadow-sm"
-          title="Ganti Profil"
+          onClick={cycleUser}
+          className="flex items-center gap-2 bg-pink-100/70 hover:bg-pink-200/70 px-3 py-1.5 rounded-full transition shadow-sm border border-pink-200 cursor-pointer"
         >
-          <span className="text-sm">{user.avatar}</span>
+          <span className="text-base">{user.avatar}</span>
           <span className="text-xs font-bold text-slate-700">{user.name}</span>
-          <span className="text-xs text-pink-400">🔄</span>
+          <span className="text-xs text-pink-500">🔄</span>
         </button>
       </header>
 
-      {/* Konten Utama (Tanpa Foto, Jarak Lega & Warna Ceria) */}
+      {/* Konten Utama */}
       <main className="flex-1 p-5 overflow-y-auto pb-32 space-y-6">
         {activeTab === 'home' && (
-          <div className="space-y-6">
-            {/* Kartu Sambutan Ceria ala Skincare Aesthetic */}
+          <div className="space-y-4">
+            {/* Kartu Sambutan Ceria Sederhana */}
             <div className="bg-gradient-to-r from-pink-400 to-rose-400 p-6 rounded-[28px] shadow-sm text-white flex items-center gap-4">
               <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-2xl shadow-inner shrink-0 border border-white/30">
                 {user.avatar}
               </div>
               <div>
                 <h2 className="text-lg font-black tracking-tight">Halo, {user.name}! ✨</h2>
-                <p className="text-pink-100 text-xs mt-0.5">Semoga hari ini menyenangkan dan penuh berkah.</p>
               </div>
             </div>
+
+            {/* Kotak Newsletter Interaktif Keluarga */}
+            <InteractiveNewsletter />
 
             {/* Papan Pengumuman / Message Board */}
             <MessageBoard currentUser={user} />
           </div>
         )}
 
-        {activeTab === 'schedule' && <ScheduleManager />}
-        {activeTab === 'todo' && <TodoManager userId={user.id} />}
-        {activeTab === 'event' && <EventManager />}
-        {activeTab === 'menu' && <MenuManager />}
+        {activeTab === 'todos' && <TodoManager currentUser={user} />}
+        {activeTab === 'events' && <EventManager currentUser={user} />}
+        {activeTab === 'menu' && <MenuManager currentUser={user} />}
+        {activeTab === 'schedule' && <ScheduleManager currentUser={user} />}
       </main>
 
-      {/* Toolbar Navigasi Bawah (Jarak Longgar, Tidak Mepet, Warna Pink Ceria) */}
-      <nav className="fixed bottom-0 w-full max-w-md bg-white/95 backdrop-blur-md border-t border-pink-100 flex justify-around p-3 rounded-t-[28px] z-30 shadow-[0_-5px_20px_rgba(255,182,193,0.2)]">
+      {/* Navigasi Menu Bawah */}
+      <nav className="absolute bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-pink-100 py-3 px-6 flex justify-around items-center z-30 shadow-lg">
         <button 
           onClick={() => setActiveTab('home')} 
-          className={`p-3 rounded-2xl transition-all flex items-center justify-center ${activeTab === 'home' ? 'text-white bg-pink-400 shadow-md shadow-pink-200 scale-105' : 'text-slate-400 hover:text-slate-600 hover:bg-pink-50'}`}
+          className={`flex flex-col items-center transition ${activeTab === 'home' ? 'text-pink-500 scale-110' : 'text-slate-400 hover:text-slate-600'}`}
         >
-          <Home size={22} />
+          <Home className="w-6 h-6" />
+          <span className="text-[10px] font-bold mt-1">Beranda</span>
         </button>
+
         <button 
-          onClick={() => setActiveTab('schedule')} 
-          className={`p-3 rounded-2xl transition-all flex items-center justify-center ${activeTab === 'schedule' ? 'text-white bg-pink-400 shadow-md shadow-pink-200 scale-105' : 'text-slate-400 hover:text-slate-600 hover:bg-pink-50'}`}
+          onClick={() => setActiveTab('todos')} 
+          className={`flex flex-col items-center transition ${activeTab === 'todos' ? 'text-pink-500 scale-110' : 'text-slate-400 hover:text-slate-600'}`}
         >
-          <BookOpen size={22} />
+          <CheckSquare className="w-6 h-6" />
+          <span className="text-[10px] font-bold mt-1">Tugas</span>
         </button>
+
         <button 
           onClick={() => setActiveTab('menu')} 
-          className={`p-3 rounded-2xl transition-all flex items-center justify-center ${activeTab === 'menu' ? 'text-white bg-pink-400 shadow-md shadow-pink-200 scale-105' : 'text-slate-400 hover:text-slate-600 hover:bg-pink-50'}`}
+          className={`flex flex-col items-center transition ${activeTab === 'menu' ? 'text-pink-500 scale-110' : 'text-slate-400 hover:text-slate-600'}`}
         >
-          <Utensils size={22} />
+          <Utensils className="w-6 h-6" />
+          <span className="text-[10px] font-bold mt-1">Menu</span>
         </button>
+
         <button 
-          onClick={() => setActiveTab('todo')} 
-          className={`p-3 rounded-2xl transition-all flex items-center justify-center ${activeTab === 'todo' ? 'text-white bg-pink-400 shadow-md shadow-pink-200 scale-105' : 'text-slate-400 hover:text-slate-600 hover:bg-pink-50'}`}
+          onClick={() => setActiveTab('schedule')} 
+          className={`flex flex-col items-center transition ${activeTab === 'schedule' ? 'text-pink-500 scale-110' : 'text-slate-400 hover:text-slate-600'}`}
         >
-          <CheckSquare size={22} />
+          <BookOpen className="w-6 h-6" />
+          <span className="text-[10px] font-bold mt-1">Catatan</span>
         </button>
+
         <button 
-          onClick={() => setActiveTab('event')} 
-          className={`p-3 rounded-2xl transition-all flex items-center justify-center ${activeTab === 'event' ? 'text-white bg-pink-400 shadow-md shadow-pink-200 scale-105' : 'text-slate-400 hover:text-slate-600 hover:bg-pink-50'}`}
+          onClick={() => setActiveTab('events')} 
+          className={`flex flex-col items-center transition ${activeTab === 'events' ? 'text-pink-500 scale-110' : 'text-slate-400 hover:text-slate-600'}`}
         >
-          <Calendar size={22} />
+          <Calendar className="w-6 h-6" />
+          <span className="text-[10px] font-bold mt-1">Kalender</span>
         </button>
       </nav>
+
     </div>
   );
 }
