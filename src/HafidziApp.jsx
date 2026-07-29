@@ -67,14 +67,14 @@ function InteractiveNewsletter() {
 
 export default function HafidziApp() {
   const [activeTab, setActiveTab] = useState('home');
-  const [user, setUser] = useState({ name: 'Ibu', avatar: '👩🏻' });
+  const [user, setUser] = useState({ name: 'Asri', avatar: '👩🏻' });
 
-  // Data profil anggota keluarga untuk tombol ganti profil di pojok kanan atas
+  // Data profil anggota keluarga yang sudah diperbarui (Asri, Rezqi, Bebe, Aca, Ciya)
   const familyProfiles = [
-    { name: 'Ibu', avatar: '👩🏻' },
-    { name: 'Papa', avatar: '👨🏻' },
+    { name: 'Asri', avatar: '👩🏻' },
+    { name: 'Rezqi', avatar: '👨🏻' },
     { name: 'Bebe', avatar: '👧🏻' },
-    { name: 'Aca', avatar: '👧🏻' }
+    { name: 'Aca', avatar: '👧🏻' },
     { name: 'Ciya', avatar: '👧🏻' }
   ];
 
