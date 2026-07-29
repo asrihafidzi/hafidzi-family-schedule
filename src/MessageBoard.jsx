@@ -7,14 +7,14 @@ export default function MessageBoard({ currentUser }) {
     if (saved) {
       try { return JSON.parse(saved); } catch (e) { return []; }
     }
-    return [
-      { id: 1, author: 'Papa', text: 'Akhir pekan ini kita akan piknik ke taman ya!', time: 'Hari ini, 10:00' }
-    ];
+    return []; // Bersih tanpa pesan contoh bawaan
   });
   const [newText, setNewText] = useState('');
 
   useEffect(() => {
     localStorage.setItem('hafidzi_messages', JSON.stringify(messages));
+    // Memberi tahu perangkat/tab lain bahwa ada perubahan data pesan
+    window.dispatchEvent(new Event('hafidzi_data_changed'));
   }, [messages]);
 
   const addMessage = (e) => {
@@ -80,22 +80,26 @@ export default function MessageBoard({ currentUser }) {
 
         {/* Daftar Pesan */}
         <div className="space-y-3">
-          {messages.map(m => (
-            <div key={m.id} className="p-4 bg-slate-50/60 rounded-2xl border border-slate-100 flex justify-between items-start hover:bg-slate-50 transition">
-              <div className="space-y-1 pr-2">
-                <p className="text-slate-700 text-sm font-medium leading-relaxed">"{m.text}"</p>
-                <div className="flex items-center gap-2 pt-1">
-                  <span className="px-2 py-0.5 bg-white text-slate-700 text-xs font-bold rounded-md shadow-xs border border-slate-100">
-                    {m.author}
-                  </span>
-                  <span className="text-xs text-slate-400">{m.time}</span>
+          {messages.length === 0 ? (
+            <p className="text-center text-slate-400 text-sm py-4">Belum ada pesan. Yuk, mulai ngobrol!</p>
+          ) : (
+            messages.map(m => (
+              <div key={m.id} className="p-4 bg-slate-50/60 rounded-2xl border border-slate-100 flex justify-between items-start hover:bg-slate-50 transition">
+                <div className="space-y-1 pr-2">
+                  <p className="text-slate-700 text-sm font-medium leading-relaxed">"{m.text}"</p>
+                  <div className="flex items-center gap-2 pt-1">
+                    <span className="px-2 py-0.5 bg-white text-slate-700 text-xs font-bold rounded-md shadow-xs border border-slate-100">
+                      {m.author}
+                    </span>
+                    <span className="text-xs text-slate-400">{m.time}</span>
+                  </div>
                 </div>
+                <button onClick={() => deleteMessage(m.id)} className="text-slate-300 hover:text-red-400 transition p-1.5 rounded-xl hover:bg-red-50 cursor-pointer">
+                  <Trash2 size={15} />
+                </button>
               </div>
-              <button onClick={() => deleteMessage(m.id)} className="text-slate-300 hover:text-red-400 transition p-1.5 rounded-xl hover:bg-red-50 cursor-pointer">
-                <Trash2 size={15} />
-              </button>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </div>
