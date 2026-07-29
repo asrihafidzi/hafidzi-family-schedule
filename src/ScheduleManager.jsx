@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from './firebase';
-import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { Calendar, Shield, User, Shirt, BookOpen, FileText, Plus, Trash2, Sparkles, Star, Award, LogOut } from 'lucide-react';
 
 export default function ScheduleManager() {
@@ -37,7 +37,7 @@ export default function ScheduleManager() {
 
     // Daftar nama orang tua
     const parents = ['ASRI', 'REZQI'];
-    // Daftar nama anak-anak (Ciya belum sekolah, tapi bisa masuk atau difilter)
+    // Daftar nama anak-anak
     const kids = ['BEBE', 'ACA', 'CIYA', 'BELLA'];
 
     if (parents.includes(formattedName)) {
@@ -50,7 +50,6 @@ export default function ScheduleManager() {
       setCurrentUserName(formattedName);
       setIsAdmin(false);
       setNameError('');
-      // Jika yang login Bebe atau Aca, langsung arahkan ke profil mereka
       if (schoolKids.includes(formattedName)) {
         setSelectedChild(formattedName);
       }
@@ -70,7 +69,6 @@ export default function ScheduleManager() {
   useEffect(() => {
     if (!currentUserName) return;
 
-    // Kunci dokumen Firestore dipisah berdasarkan nama anak (misal: 'Jadwal Pelajaran_BEBE')
     const docKeyPelajaran = `Jadwal Pelajaran_${selectedChild}`;
     const docKeySeragam = `Jadwal Seragam_${selectedChild}`;
     const docKeyCatatan = `Catatan Hari Ini_${selectedChild}`;
@@ -112,10 +110,8 @@ export default function ScheduleManager() {
     };
   }, [currentUserName, selectedDay, selectedChild]);
 
-  // Handler saat ganti hari atau ganti anak
   const handleDayChange = (day) => {
     setSelectedDay(day);
-    // Data akan otomatis tersinkron lewat useEffect
   };
 
   const handleChildTabChange = (childName) => {
@@ -144,6 +140,7 @@ export default function ScheduleManager() {
     setItemListSeragam(updated.length > 0 ? updated : ['']);
   };
 
+  // Menggunakan setDoc dengan { merge: true } agar otomatis membuat dokumen jika belum ada
   const handleSaveAll = async (e) => {
     e.preventDefault();
     try {
@@ -154,14 +151,14 @@ export default function ScheduleManager() {
       const docKeySeragam = `Jadwal Seragam_${selectedChild}`;
       const docKeyCatatan = `Catatan Hari Ini_${selectedChild}`;
 
-      await updateDoc(doc(db, 'family_data', docKeyPelajaran), { [selectedDay]: filteredPelajaran });
-      await updateDoc(doc(db, 'family_data', docKeySeragam), { [selectedDay]: filteredSeragam });
-      await updateDoc(doc(db, 'family_data', docKeyCatatan), { [selectedDay]: catatanText });
+      await setDoc(doc(db, 'family_data', docKeyPelajaran), { [selectedDay]: filteredPelajaran }, { merge: true });
+      await setDoc(doc(db, 'family_data', docKeySeragam), { [selectedDay]: filteredSeragam }, { merge: true });
+      await setDoc(doc(db, 'family_data', docKeyCatatan), { [selectedDay]: catatanText }, { merge: true });
 
       alert(`Berhasil menyimpan data ${selectedChild} hari ${selectedDay}! ✨`);
     } catch (error) {
       console.error("Gagal menyimpan:", error);
-      alert("Gagal menyimpan ke Firebase. Pastikan dokumen database sudah diinisialisasi.");
+      alert("Gagal menyimpan ke Firebase. Periksa koneksi internet atau aturan Firestore.");
     }
   };
 
@@ -231,7 +228,6 @@ export default function ScheduleManager() {
     );
   }
 
-  // Data Tampilan Aktif
   const activePelajaran = pelajaranData[selectedDay] || [];
   const activeSeragam = seragamData[selectedDay] || [];
   const activeCatatan = catatanData[selectedDay] || 'Tidak ada catatan khusus untuk hari ini. Tetap semangat ya! ✨';
@@ -257,7 +253,7 @@ export default function ScheduleManager() {
         }
       `}</style>
 
-      {/* Header Banner dengan Informasi Pengguna yang Sedang Login */}
+      {/* Header Banner */}
       <div className="glitter-badge p-5 rounded-[2.5rem] border border-amber-200/60 flex items-center justify-between shadow-xs">
         <div className="space-y-1">
           <div className="flex items-center gap-1.5 text-xs font-bold text-amber-600 uppercase tracking-wider">
