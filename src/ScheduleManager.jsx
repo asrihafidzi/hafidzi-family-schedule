@@ -4,12 +4,18 @@ import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { Calendar, Shield, User, Shirt, BookOpen, FileText, Plus, Trash2, Sparkles, Star, Award, LogOut } from 'lucide-react';
 
 export default function ScheduleManager() {
-  // Selalu mulai dari kosong agar selalu muncul halaman "Halo, Siapa Kamu?" saat link dibuka
-  const [currentUserName, setCurrentUserName] = useState('');
+  // Ambil data dari sessionStorage agar aman per tab/browser, atau mulai dari kosong
+  const [currentUserName, setCurrentUserName] = useState(() => {
+    return sessionStorage.getItem('hafidzi_user') || '';
+  });
+  
   const [inputName, setInputName] = useState('');
   const [nameError, setNameError] = useState('');
   
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(() => {
+    return sessionStorage.getItem('hafidzi_is_admin') === 'true';
+  });
+
   const [selectedDay, setSelectedDay] = useState('Senin');
   const [selectedChild, setSelectedChild] = useState('BEBE');
 
@@ -34,10 +40,14 @@ export default function ScheduleManager() {
     if (parents.includes(formattedName)) {
       setCurrentUserName(formattedName);
       setIsAdmin(true);
+      sessionStorage.setItem('hafidzi_user', formattedName);
+      sessionStorage.setItem('hafidzi_is_admin', 'true');
       setNameError('');
     } else if (kids.includes(formattedName)) {
       setCurrentUserName(formattedName);
       setIsAdmin(false);
+      sessionStorage.setItem('hafidzi_user', formattedName);
+      sessionStorage.setItem('hafidzi_is_admin', 'false');
       setNameError('');
       if (schoolKids.includes(formattedName)) {
         setSelectedChild(formattedName);
@@ -49,7 +59,10 @@ export default function ScheduleManager() {
 
   const handleLogout = () => {
     setCurrentUserName('');
+    setIsAdmin(false);
     setInputName('');
+    sessionStorage.removeItem('hafidzi_user');
+    sessionStorage.removeItem('hafidzi_is_admin');
   };
 
   useEffect(() => {
@@ -256,7 +269,7 @@ export default function ScheduleManager() {
           title="Keluar / Ganti Nama"
           className="p-3 bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-500 rounded-2xl shadow-xs border border-amber-100 transition flex items-center gap-1.5 text-xs font-bold cursor-pointer"
         >
-          <LogOut size={16} /> <span className="hidden sm:inline">Ganti Nama</span>
+          <LogOut size={16} /> <span className="hidden sm:inline">Keluar</span>
         </button>
       </div>
 
