@@ -73,8 +73,9 @@ export default function HafidziApp() {
   const familyProfiles = [
     { name: 'Ibu', avatar: '👩🏻' },
     { name: 'Papa', avatar: '👨🏻' },
-    { name: 'Kakak', avatar: '👧🏻' },
-    { name: 'Adik', avatar: '👦🏻' }
+    { name: 'Bebe', avatar: '👧🏻' },
+    { name: 'Aca', avatar: '👧🏻' }
+    { name: 'Ciya', avatar: '👧🏻' }
   ];
 
   const cycleUser = () => {
